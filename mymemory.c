@@ -31,7 +31,7 @@ void initialize() {
 }
 
 _Bool isFree(Segment_t* seg, size_t amount) {
-  return (!(seg->allocated) && seg->size > amount);
+  return (!(seg->allocated) && seg->size >= amount);
 }
 
 // helper functions for management segmentation table
@@ -58,9 +58,10 @@ void* mymalloc(size_t size) {
   Segment_t* oldSegment = findFree(segmenttable, size);
   if (oldSegment) {
     oldSegment->size -= size;
-    Segment_t* start = oldSegment->start + oldSegment->size;
+    Segment_t* newSegStart = oldSegment->start;
+    oldSegment->start += size;
     Segment_t* newSegment = malloc(sizeof(Segment_t));
-    *newSegment = seg_get(TRUE, start, size, 0);
+    *newSegment = seg_get(TRUE, newSegStart, size, 0);
     insertAfter(oldSegment, newSegment);
     return newSegment->start;
   } else {
@@ -68,16 +69,28 @@ void* mymalloc(size_t size) {
   }
 }
 
-void myfree(void* ptr) {
-  printf("myfree> start\n");
-}
-
 void mydefrag(void** ptrlist) {
   printf("mydefrag> start\n");
 }
 
+// This function searches for a segment in the list where list->start == ptr
+// This function either returns a pointer to a found segment descriptor,
+// or NULL if no such segment exists
 Segment_t* findSegment(Segment_t* list, void* ptr) {
-  return &(Segment_t){0};
+  Segment_t* s = list;
+  do {
+    if (s->start == ptr)
+      return s;
+
+  } while ((s = s->next));
+
+  return 0;
+}
+
+void myfree(void* ptr) {
+  printf("myfree> start\n");
+  Segment_t* seg = findSegment(segmenttable, ptr);
+  seg->allocated = FALSE;
 }
 
 int isPrintable(int c) {
