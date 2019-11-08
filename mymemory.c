@@ -102,6 +102,8 @@ void myfree(void* ptr) {
   printf("myfree> start\n");
   Segment_t* seg = findSegment(segmenttable, ptr);
   seg->allocated = FALSE;
+  // memset for testing dellocation
+  // memset(seg->start, 0, seg->size);
 }
 
 int isPrintable(int c) {
