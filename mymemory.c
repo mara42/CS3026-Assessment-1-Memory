@@ -52,8 +52,6 @@ void insertAfter(Segment_t* oldSegment, Segment_t* newSegment) {
 }
 
 // this function “allocates” memory of a particular size and returns a pointer
-// to the first byte of the allocated segment and returns a pointer to
-// a location in your memory array
 void* mymalloc(size_t size) {
   printf("mymalloc> start\n");
   // implement the mymalloc functionality
