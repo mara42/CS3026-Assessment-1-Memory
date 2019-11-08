@@ -1,3 +1,5 @@
+
+// Martti Aukia 51657228
 /* mymemory.h
  *
  * describes structures for memory management
@@ -19,6 +21,7 @@
 #define MAXMEM 1024
 #define MAXSEGMENTS 100
 
+
 // this typedef defines a byte
 typedef unsigned char Byte;
 
@@ -27,13 +30,8 @@ extern Byte mymemory[MAXMEM];
 
 // the segment descriptor, a node in a linked list
 typedef struct segmentdescriptor {
-  // The attribute “allocated” represents a Boolean (in mymemory.h, the two
-  // macros TRUE and FALSE are defined and should be used for “allocated”.
   bool allocated;  // replaced with bool
-  // The attribute “start” points to the byte in mymemory where the allocated
-  // segment starts
   void* start;
-  // The attribute “size” defines the number of bytes of a segment
   size_t size;
   struct segmentdescriptor* next;
 } Segment_t;
@@ -42,17 +40,17 @@ typedef struct segmentdescriptor {
 extern Segment_t* segmenttable;  // use of reserved type naming
                                  // convention '_t'-postfix
 
+/******************** my own helper functions for readability ********************/
+_Bool isFree(Segment_t*, size_t);
+Segment_t seg_get(_Bool, void*, size_t, Segment_t*);
+/********************            end                          ********************/
+
 // forward references, user interface
 
 // this function initialises the segmentation table and the memory array, it has
-// to be called first before the other functions can be used.
 void initialize();
-// this function “allocates” memory of a particular size and returns a pointer
-// to the first byte of the allocated segment
 void* mymalloc(size_t);
-// frees a previously allocated memory
 void myfree(void*);
-// defragments the memory and compacts smaller segments into larger ones
 void mydefrag(void**);
 
 // forward references, managing segmentation table

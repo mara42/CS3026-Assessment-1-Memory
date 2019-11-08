@@ -1,3 +1,4 @@
+// Martti Aukia 51657228
 /* mymemory.c
  *
  * provides interface to memory management
@@ -14,7 +15,7 @@
 Byte mymemory[MAXMEM];
 Segment_t* segmenttable = NULL;
 
-Segment_t seg_get(_Bool allocated, void* start, size_t size, Segment_t* next) {
+inline Segment_t seg_get(_Bool allocated, void* start, size_t size, Segment_t* next) {
   Segment_t seg = {
       .allocated = allocated, .start = start, .size = size, .next = next};
   return seg;
@@ -22,15 +23,21 @@ Segment_t seg_get(_Bool allocated, void* start, size_t size, Segment_t* next) {
 
 void initialize() {
   printf("initialize> start\n");
-
+   // set memory to 0
+   // create segment table
   memset(mymemory, 0, MAXMEM);
+   // contains one segment description that declares the whole memory
+   // as one free segment
+   //
+   // create a single segment descriptor
   segmenttable = malloc(sizeof(Segment_t));
+   // initialise the segment
   *segmenttable = seg_get(FALSE, &mymemory[0], MAXMEM, 0);
 
   printf("initialize> end\n");
 }
 
-_Bool isFree(Segment_t* seg, size_t amount) {
+inline _Bool isFree(Segment_t* seg, size_t amount) {
   return (!(seg->allocated) && seg->size >= amount);
 }
 
@@ -45,6 +52,7 @@ Segment_t* findFree(Segment_t* list, size_t size) {
   return 0;
 }
 
+// standard linked list insert
 void insertAfter(Segment_t* oldSegment, Segment_t* newSegment) {
   Segment_t* last = oldSegment->next ? oldSegment->next : 0;
   oldSegment->next = newSegment;
@@ -54,7 +62,6 @@ void insertAfter(Segment_t* oldSegment, Segment_t* newSegment) {
 // this function “allocates” memory of a particular size and returns a pointer
 void* mymalloc(size_t size) {
   printf("mymalloc> start\n");
-  // implement the mymalloc functionality
   Segment_t* oldSegment = findFree(segmenttable, size);
   if (oldSegment) {
     oldSegment->size -= size;
@@ -62,6 +69,7 @@ void* mymalloc(size_t size) {
     oldSegment->start += size;
     Segment_t* newSegment = malloc(sizeof(Segment_t));
     *newSegment = seg_get(TRUE, newSegStart, size, 0);
+    // segments are allocated in memory order
     insertAfter(oldSegment, newSegment);
     return newSegment->start;
   } else {
@@ -70,6 +78,7 @@ void* mymalloc(size_t size) {
 }
 
 void mydefrag(void** ptrlist) {
+  // no code here intentionally
   printf("mydefrag> start\n");
 }
 
@@ -88,6 +97,8 @@ Segment_t* findSegment(Segment_t* list, void* ptr) {
 }
 
 void myfree(void* ptr) {
+  // opted to copy mallocs behaviour and not
+  // NULL existing content inside newly allocated memory
   printf("myfree> start\n");
   Segment_t* seg = findSegment(segmenttable, ptr);
   seg->allocated = FALSE;
@@ -101,6 +112,7 @@ int isPrintable(int c) {
 }
 
 void printmemory() {
+  // output very close to practical 2
   unsigned char* array = mymemory;
   char byte_buffer[16 * 3 + 1] = {0};
   char string_buffer[16 + 1] = {0};
@@ -123,6 +135,7 @@ void printmemory() {
     sprintf(string_buffer + column, "%c", ch);
   }
 
+  // 3 spaces for each BYTE
   for (size_t i = 0; i < padding * 3; i++) {
     byte_buffer[byteI + i] = ' ';
   }
@@ -130,7 +143,6 @@ void printmemory() {
 }
 
 void printsegmentdescriptor(Segment_t* descriptor) {
-  printf("%c", descriptor->allocated);
   printf("\tallocated = %s\n",
          (descriptor->allocated == FALSE ? "FALSE" : "TRUE"));
   printf("\tstart     = %p\n", descriptor->start);
